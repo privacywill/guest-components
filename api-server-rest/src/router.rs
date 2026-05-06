@@ -4,6 +4,7 @@
 //
 
 use anyhow::*;
+use base64::Engine;
 use hyper::body::HttpBody;
 use hyper::{header, Body, Method, Request, Response, StatusCode};
 use serde::Serialize;
@@ -168,10 +169,14 @@ impl Router {
                             info!("Get evidence");
                             match params.get("runtime_data") {
                                 Some(runtime_data) => {
-                                    match client
-                                        .get_evidence(&runtime_data.clone().into_bytes())
-                                        .await
-                                    {
+                                    let runtime_data =
+                                        match base64::engine::general_purpose::STANDARD
+                                            .decode(runtime_data)
+                                        {
+                                            std::result::Result::Ok(data) => data,
+                                            Err(_e) => return self.bad_request(),
+                                        };
+                                    match client.get_evidence(&runtime_data).await {
                                         std::result::Result::Ok(results) => {
                                             return self.octet_stream_response(results)
                                         }

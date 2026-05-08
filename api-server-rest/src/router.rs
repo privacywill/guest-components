@@ -170,7 +170,7 @@ impl Router {
                             match params.get("runtime_data") {
                                 Some(runtime_data) => {
                                     let runtime_data =
-                                        match base64::engine::general_purpose::STANDARD
+                                        match base64::engine::general_purpose::URL_SAFE_NO_PAD
                                             .decode(runtime_data)
                                         {
                                             std::result::Result::Ok(data) => data,
